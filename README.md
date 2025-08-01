@@ -9,40 +9,54 @@ A comprehensive delivery management system built with Next.js, TypeScript, and T
 - JWT-based authentication
 - Role-based session handling
 - Protected routes with middleware
+- Enhanced driver registration with vehicle and license information
 
 ### 📦 Order Management (Admin Panel)
 - Create, read, update, and delete customer orders
 - Filter and search orders by status
 - Real-time order tracking
 - Customer information management
+- Advanced order assignment system
 
 ### 🚚 Driver Assignment (Admin Panel)
 - Assign orders to available drivers
-- View available drivers
+- View available drivers with detailed information
 - Reassign drivers when needed
 - Driver availability tracking
+- Driver profile management with vehicle and license details
 
 ### 📲 Driver Actions (Mobile/Web View)
 - View assigned deliveries
 - Accept or reject order assignments
 - Update delivery status (Picked up, On the way, Delivered)
 - Real-time status updates
+- Add delivery notes and comments
 
 ### 📊 Admin Dashboard
-- Real-time statistics
-- Total orders overview
-- Available drivers count
+- Real-time statistics and analytics
+- Total orders overview with status breakdown
+- Available drivers count and status
 - Completed orders tracking
 - In-progress orders monitoring
+- System performance metrics
+
+### 🔧 System Monitoring & Debugging
+- **System Status Page**: Real-time health monitoring at `/status`
+- **API Debugger**: Development tool for monitoring API calls
+- **Test Page**: Authentication testing interface at `/test`
+- **Error Boundary**: Graceful error handling and recovery
+- **Toast Notifications**: User-friendly feedback system
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Authentication**: JWT + bcrypt
+- **Framework**: Next.js 15.4.4 (App Router)
+- **Language**: TypeScript 5
+- **Styling**: Tailwind CSS 4
+- **Authentication**: JWT + bcryptjs
 - **Database**: JSON Server (for development)
-- **UI Components**: Custom components with Tailwind
+- **UI Components**: Custom components with Tailwind + Lucide React icons
+- **HTTP Client**: Axios with interceptors
+- **State Management**: React Context API
 
 ## Project Structure
 
@@ -61,12 +75,24 @@ delivery-management-system/
 │   │   │   ├── orders/
 │   │   │   ├── drivers/
 │   │   │   ├── deliveries/
-│   │   │   └── dashboard/
+│   │   │   ├── dashboard/
+│   │   │   └── health/
 │   │   ├── register/
+│   │   ├── login/
+│   │   ├── dashboard/
+│   │   ├── drivers/
+│   │   ├── status/
+│   │   ├── test/
 │   │   └── page.tsx
 │   ├── components/
-│   │   └── auth/
+│   │   ├── auth/
+│   │   ├── ApiDebugger.tsx
+│   │   ├── ErrorBoundary.tsx
+│   │   ├── LoadingSpinner.tsx
+│   │   ├── Toast.tsx
+│   │   └── ToastContainer.tsx
 │   ├── contexts/
+│   ├── hooks/
 │   ├── lib/
 │   └── types/
 ├── db/
@@ -129,8 +155,8 @@ This will start both the JSON server and Next.js development server concurrently
 
 The system uses JSON Server as a mock database. The database file is located at `db/db.json` and contains:
 
-- **Users**: Admin and driver accounts
-- **Orders**: Customer orders with status tracking
+- **Users**: Admin and driver accounts with enhanced profile information
+- **Orders**: Customer orders with status tracking and driver assignment
 - **Deliveries**: Delivery assignments and status updates
 
 ### Default Accounts
@@ -153,26 +179,37 @@ For testing purposes, the following accounts are pre-configured:
 
 1. **Dashboard**: View real-time statistics and system overview
 2. **Orders Management**: 
-   - Create new orders
-   - View all orders with filtering
+   - Create new orders with customer details
+   - View all orders with advanced filtering
    - Assign drivers to pending orders
    - Delete orders
-3. **Driver Management**: View available drivers and their status
+   - Track order status in real-time
+3. **Driver Management**: 
+   - View available drivers with detailed profiles
+   - Monitor driver availability
+   - Manage driver assignments
 
 ### Driver Features
 
 1. **Delivery Management**:
-   - View assigned deliveries
+   - View assigned deliveries with order details
    - Accept or reject delivery assignments
    - Update delivery status (Picked up → On the way → Delivered)
-   - Add notes to deliveries
+   - Add notes and comments to deliveries
+   - Real-time status synchronization
 
 ### Authentication Flow
 
-1. **Registration**: Users can register as either Admin or Driver
+1. **Registration**: Users can register as either Admin or Driver with enhanced profile information
 2. **Login**: Email/password authentication with JWT tokens
 3. **Role-based Access**: Different interfaces for Admin and Driver roles
 4. **Session Management**: Automatic redirects based on user role
+
+### System Monitoring
+
+1. **Status Page** (`/status`): Monitor system health, database connectivity, and service status
+2. **API Debugger**: Development tool for monitoring API calls in real-time
+3. **Test Page** (`/test`): Authentication testing interface for development
 
 ## API Endpoints
 
@@ -190,6 +227,8 @@ For testing purposes, the following accounts are pre-configured:
 
 ### Drivers
 - `GET /api/drivers` - Get available drivers
+- `GET /api/drivers/[id]` - Get specific driver
+- `PUT /api/drivers/[id]` - Update driver information
 
 ### Deliveries
 - `GET /api/deliveries` - Get deliveries (with driver filtering)
@@ -197,6 +236,9 @@ For testing purposes, the following accounts are pre-configured:
 
 ### Dashboard
 - `GET /api/dashboard` - Get admin dashboard statistics
+
+### Health
+- `GET /api/health` - System health check
 
 ## Development
 
@@ -207,6 +249,13 @@ For testing purposes, the following accounts are pre-configured:
 3. **Types**: Define TypeScript interfaces in `src/types/`
 4. **Pages**: Add new pages in `src/app/`
 
+### Development Tools
+
+- **API Debugger**: Monitor API calls in real-time during development
+- **Error Boundary**: Catch and handle errors gracefully
+- **Toast System**: Provide user feedback for actions
+- **Loading States**: Consistent loading indicators throughout the app
+
 ### Database Schema
 
 The JSON database structure:
@@ -215,17 +264,18 @@ The JSON database structure:
 {
   "users": [
     {
-      "id": 1,
+      "id": "1",
       "email": "admin@delivery.com",
       "password": "hashed_password",
       "role": "admin",
       "name": "Admin User",
+      "phone": "1234567890",
       "createdAt": "2024-01-01T00:00:00.000Z"
     }
   ],
   "orders": [
     {
-      "id": 1,
+      "id": "1",
       "customerName": "Customer Name",
       "customerAddress": "Address",
       "customerPhone": "Phone",
@@ -239,9 +289,9 @@ The JSON database structure:
   ],
   "deliveries": [
     {
-      "id": 1,
-      "orderId": 1,
-      "driverId": 2,
+      "id": "1",
+      "orderId": "1",
+      "driverId": "2",
       "status": "pending",
       "pickupTime": null,
       "deliveryTime": null,
